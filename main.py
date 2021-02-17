@@ -99,13 +99,14 @@ def array_to_png(arr):
 
 def main():
 
+	#s = read_file('path_to_your_file')
 	s = [symbols,symbols,symbols]
 	source_img = array_to_png(s)
 
 	#source_img = line_create(symbols)
 	
 	source_img.show()
-	#source_img.save("output/output.png")
+	source_img.save("output/output.png")
 
 if __name__=="__main__":
 	main()
