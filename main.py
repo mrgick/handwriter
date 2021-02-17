@@ -1,11 +1,14 @@
-from PIL import Image, ImageFont, ImageDraw, ImageEnhance
+from PIL import Image
 import random
 import os
 
+#глобальный путь
 path = os.path.abspath(os.curdir)+'/'
 
+#символы, которые я нарисовал
 symbols = "abcdefghijklmnopqrstuvwxyz0123456789:;,'<>=*().-+/_абввгдеёжзиклмопрстуфхцчшщъыьэюя"
 
+#чтение файла
 def read_file(file_name):
 	f = open(file_name,'r')
 	data = f.read()
@@ -13,30 +16,29 @@ def read_file(file_name):
 	data = data.split('\n')
 	return data
 
-def insert_letter(img_source,symbol_name,px,py,path):
+#вставка буквы в изображение
+def insert_letter(img_source,symbol_name,px,py):
 	if symbol_name =='.':
 		symbol_name = 'point'
 	if symbol_name == '/':
 		symbol_name = 'div'
-	path = path + 'symbols/' + symbol_name
-	if os.path.exists(path) == True:
+	path_symbols = path + 'symbols/' + symbol_name
+	if os.path.exists(path_symbols) == True:
 		
+		#определяем кол-во вариаций и выбираем одну
 		num = 1
-		path2 =path+'/'+str(num)+'.png'
+		path2 =path_symbols+'/'+str(num)+'.png'
 		while os.path.exists(path2) == True:
 			num = num+1
 			path2=path+'/'+str(num)+'.png'
 		num = int(random.uniform(1,num))
 
-
-		img_letter = Image.open(path+'/'+str(num)+'.png')
-
+		img_letter = Image.open(path_symbols+'/'+str(num)+'.png')
 
 		# изменяем размер
 		rresize = int(random.uniform(-3,3))
 		img_letter = img_letter.resize((img_letter.size[0]+rresize, img_letter.size[1]+rresize), Image.ANTIALIAS)
 		px_img_size = img_letter.size[0]		
-
 
 		#поворот
 		rrot = random.uniform(-3,3)
@@ -47,43 +49,60 @@ def insert_letter(img_source,symbol_name,px,py,path):
 		rpy = int(random.uniform(0,4))
 		img_source.alpha_composite(img_letter, (px, py+rpy))
 		px = px+px_img_size
-		
 	
 	else:
 		print('there are no symbol:'+symbol_name)
 	return img_source,px
 
 
-source_img = Image.open(path+'/'+'background/A35.png')
-py=159
-#s = [' 1 абввгдеёжзиклмопрстуфхцчшщъыьэюя',symbols]
-#s = [symbols,symbols,symbols]
-#s = ["abcdefghijklmnopqrstuvwxyz0123456789","abcdefghijklmnopqrstuvwxyz0123456789","abcdefghijklmnopqrstuvwxyz0123456789"]
-#s = ['Введенная точка не принадлежит фигуре','Введенная точка не принадлежит фигуре','Введенная точка не принадлежит фигуре']
-#s = ['99999999999988888888888212777777666666666665555533332222111111111^^^^^^a^b:=:=:=:=:=:=:=:=:=:=:=:=,/////////////',"[[[[[[[[[фывфвфв]]]]]]]",":::::::::::","..........."]
-s = read_file('/home/gick/Документы/programs/pascal/labs/2/2_1.pas')
-#s = read_file('/home/gick/Документы/programs/pascal/labs/8/8.pas')
-for j in range(len(s)):
-	px = 10+int(random.uniform(-10,10))
-	for i in range(len(s[j])):
-		if s[j][i]!=" " and s[j][i]!="\t":
-			symbol = s[j][i].lower()
+
+#создание строки с буквами
+def line_create(symbols_str,paper='clear'):
+	px = 0
+	py = 0
+	img_line = Image.open(path+'background/line_place_'+paper+'.png')
+	for i in range(len(symbols_str)):
+
+		if symbols_str[i]!=" " and symbols_str[i]!="\t":
+			symbol = symbols_str[i].lower()
+
+			#производим замену некоторых символов
 			if symbol=='┌' or symbol=='┬' or symbol=='┐' or symbol=='└' or symbol=='┴' or symbol=='┘' or symbol=='─':
 				symbol = '-'
 			elif symbol=='│' or symbol=='├' or symbol=='|' or symbol=='┼' or symbol=='┤': 
 				symbol='l'
-			source_img,px = insert_letter(source_img,symbol,px,py,path) 
+
+			img_line,px = insert_letter(img_line,symbol,px,py) 
 			px = px
 		else:
-			if j == 6:
-				px = px+20+int(random.uniform(-10,10))
-			else:
-				px = px+25+int(random.uniform(-10,10))
-	#py = py + 59 #one 
-	if j == 13:
-		py = py+118+59
-	else:
-		py = py + 118 #two
-#print(s)
-#source_img.show()
-source_img.save("output/output.png")
+			px = px+25+int(random.uniform(-10,10))
+	return img_line
+
+
+#представление печатного текста в рукописном
+def array_to_png(arr):
+	source_img = Image.open(path+'background/A35.png')
+	py=159
+	for j in range(len(arr)):
+		px = 10+int(random.uniform(-10,10))
+		img_line = line_create(arr[j],'clear')
+		source_img.alpha_composite(img_line, (px, py))
+		px = px
+
+		#py = py + 59 #one 
+		if j == 13:
+			py = py+118+59
+		else:
+			py = py + 118 #two
+	return source_img
+
+
+def main():
+
+	s = read_file('/home/gick/Документы/programs/pascal/labs/8/8.pas')
+	source_img = array_to_png(s)
+	source_img.show()
+	#source_img.save("output/output.png")
+
+if __name__=="__main__":
+	main()
