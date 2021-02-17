@@ -99,8 +99,11 @@ def array_to_png(arr):
 
 def main():
 
-	s = read_file('/home/gick/Документы/programs/pascal/labs/8/8.pas')
+	s = [symbols,symbols,symbols]
 	source_img = array_to_png(s)
+
+	#source_img = line_create(symbols)
+	
 	source_img.show()
 	#source_img.save("output/output.png")
 
